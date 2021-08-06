@@ -1,0 +1,41 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: cloud7-employeeapp-database-deployment
+  labels:
+    name: cloud7-employeeapp-database-deployment
+spec:
+  selector:
+    matchLabels:
+      name: cloud7-employeeapp-database-deployment
+  template:
+    metadata:
+      labels:
+        name: cloud7-employeeapp-database-deployment
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.6
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret
+              key: PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: configmap
+              key: DBNAME
+        ports:
+        - name: mysql
+          containerPort: 3306
+          protocol: TCP
+
+        volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: "/var/lib/mysql"
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: cloud7-employeeapp-pvc
